@@ -29,7 +29,7 @@ default: all
 
 all: hw4.out
 
-hw3.out: ${OBJECTS}
+hw4.out: ${OBJECTS}
 	${CXX} ${FLAGS} ${OBJECTS} -o $@
 
 clean:
@@ -39,18 +39,17 @@ clean:
 	
 # Dependency lists for the various source files
 driver.o: driver.cpp\
-          SIRD.h\
-          SIRD.cpp\
           MyVector.h\
           MyVector.hpp\
-          Euler.h\
-          Euler.hpp
+          IGsolver.h\
+          IGsolver.hpp\
+          Heun.h\
+          Heun.hpp\
+          PID.h
 	g++ -c driver.cpp
 	
-SIRD.o: SIRD.cpp\
-        SIRD.h\
-        MyVector.h\
-        MyVector.hpp\
-        Euler.h\
-        Euler.hpp
-	g++ -c SIRD.cpp
+PID.o: PID.cpp\
+       MyVector.h\
+       MyVector.hpp\
+       PID.h
+	g++ -c PID.cpp

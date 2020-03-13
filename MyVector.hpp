@@ -1,10 +1,22 @@
 // Programmer : Noah Klein
 // Instructor : Price
 // Class      : CS5201 Spring 2020
-// Assignment : Homework 3 - Euler's Method for ODEs and SIR(D) Model
+// Assignment : Homework 4 - Implicit Solvers, p-norms, and 
+//					Insulin/Glucose Dynamics
 // Filename   : MyVector.hpp
 
 using namespace std;
+
+template <typename T>
+T power(const T & value, const int p)
+{
+	T pow = 1;
+	for(int i = 0; i < p; i++)
+	{
+		pow *= value;
+	}
+	return pow;
+}
 
 //
 //----------------- The Big 3 ------------------//
@@ -18,13 +30,26 @@ MyVector<T>::MyVector()
 	m_available = 10; 
 }
 
-/* template <typename T>
+template <typename T>
 MyVector<T>::MyVector(const int size)
 {
-	m_arr = new T[size];
-	m_size = 0;
+	if(size < 0) throw(std::length_error(to_string(size)));
+	if(size == 0)
+	{
+		m_arr = new T[1];
+		m_arr[0] = 0;
+	}
+	else
+	{
+		m_arr = new T[size];
+		for(int i = 0; i < size; i++)
+		{
+			m_arr[i] = 0;
+		}
+	}
+	m_size = size;
 	m_available = size;
-} */
+}
 
 template <typename T>
 MyVector<T>::MyVector(const std::initializer_list<T> & list)
@@ -51,6 +76,14 @@ MyVector<T>::MyVector(const MyVector<T> & cpy_vec)
 			this -> push_back(cpy_vec.m_arr[i]);
 		}
 	}
+	else if(m_available == 0)
+	{
+		if(m_arr)
+		{
+			delete m_arr;
+		}
+		m_arr = new T[1];
+	}
 }
 
 template <typename T>
@@ -60,11 +93,23 @@ MyVector<T>& MyVector<T>::operator=(const MyVector<T> & cpy_vec)
 	m_available = cpy_vec.m_available;
 	if(m_available > 0)
 	{
+		if(m_arr)
+		{
+			delete m_arr;
+		}
 		m_arr = new T[m_available];
 		for(int i = 0; i < cpy_vec.m_size; i++)
 		{
 			this -> push_back(cpy_vec.m_arr[i]);
 		}
+	}
+	else if(m_available == 0)
+	{
+		if(m_arr)
+		{
+			delete m_arr;
+		}
+		m_arr = new T[1];
 	}
 	return *this;
 }
@@ -85,12 +130,16 @@ void MyVector<T>::push_back(const T & item)
 	T* temp_arr;
 	if(m_available == 0)
 	{
-		m_arr = new T[1];
+		if(m_arr)
+		{
+			delete[] m_arr;
+			m_arr = new T[1];
+		}
 		m_arr[0] = item;
 		m_size = 1;
 		m_available = 1;
 	}
-	if(m_size >= m_available)
+	else if(m_size >= m_available && m_available != 0)
 	{
 		temp_arr = new T[m_available * 2];
 		for(int i = 0; i < m_size; i++)
@@ -100,10 +149,14 @@ void MyVector<T>::push_back(const T & item)
 		delete[] m_arr;
 		m_arr = temp_arr;
 		m_available = m_available * 2;
+		m_arr[m_size] = item;
+		m_size++;
 	}	
-		
-	m_arr[m_size] = item;
-	m_size++;
+	else
+	{
+		m_arr[m_size] = item;
+		m_size++;
+	}
 	return;
 }
 
@@ -179,8 +232,11 @@ void MyVector<T>::resize(const int new_size, const T& filler)
 template <typename T>
 void MyVector<T>::clear()
 {
-	delete[] m_arr;
-	m_arr = NULL;
+	if(m_arr)
+	{
+		delete[] m_arr;
+		m_arr = NULL;
+	}
 	m_size = 0;
 	m_available = 0;
 }
@@ -284,6 +340,31 @@ T MyVector<T>::operator*(const MyVector<T> & rhs) const
 		}
 	}
 	return magnitude;
+}
+
+template <typename T>
+double MyVector<T>::operator^(const int norm) const
+{
+	T tot_sum = 0;
+	double Pre = 5;
+	double error = .001;
+	double difference = 1;
+	double current;
+	
+	if(norm < 1) throw std::domain_error(to_string(norm));
+	
+	for(int i = 0; i < m_size; i++)
+	{
+		tot_sum += power(m_arr[i], norm);
+	}
+	
+	while(difference > error)
+	{
+		current = (((norm - 1) * Pre) + tot_sum/(power(Pre, norm - 1))) / norm;
+		difference = abs(current - Pre);
+		Pre = current;
+	}	
+	return current;
 }
 
 //

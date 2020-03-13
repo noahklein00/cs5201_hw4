@@ -3,7 +3,7 @@
  * Definitions for the MyVector class. \n
  * Programmer: Noah Klein \n
  * Class: CS5201 \n
- * Assignment: Homework 3 \n
+ * Assignment: Homework 4 \n
  */
 
 #ifndef MYVECTOR_H
@@ -12,7 +12,7 @@
 #include <iostream>
 #include <iterator>
 #include <functional>
-#include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -52,13 +52,12 @@ class MyVector
 		 * that size available. It initializes the space but fills it with
 		 * nothing.
 		 * \param size is the integer size of the vector to be created.
-		 * \pre The array allocated is filled with random data so the user
-		 * needs to be aware that they should not be using the data stored.
-		 * \post A MyVector object is created with random data stored and (size)
+		 * \pre The array allocated is filled with zeroes.
+		 * \post A MyVector object is created with zeroes stored and (size)
 		 * elements available.
+		 * \throw throws a std::length_error object if the size is negative.
 		 */
-		MyVector(const int size): m_arr(new T[size]), m_size(10), 
-			m_available(10) {}
+		MyVector(const int size);
 		
 		/*! \brief constructor
 		 *
@@ -88,6 +87,7 @@ class MyVector
 		 * \param cpy_vec is a MyVector that has already been initialized
 		 * with data.
 		 * \return returns a MyVector through *this.
+		 * \pre operator = needs to be defined for type T.
 		 * \post The calling object is set equal to the parameter. 
 		 */
 		MyVector<T>& operator=(const MyVector<T> & cpy_vec);
@@ -239,6 +239,16 @@ class MyVector
 		 */
 		T operator*(const MyVector<T> & rhs) const;
 		
+		/*! \brief P-norm calculator
+		 *
+		 * Description: Calculates the p-norm for a given MyVector object
+		 * \param norm is the p value for the p-norm.
+		 * \return Returns the p-norm that was calculated for the vector as
+		 * a double object.
+		 * \pre operator += needs to be defined for type T.
+		 */
+		double operator^(const int norm) const;
+		
 		
 		// Friend //
 		
@@ -246,7 +256,8 @@ class MyVector
 		 *
 		 * Description: Used to add two vectors together. Allows for vectors
 		 * of different (or similar) sizes to be added through vector addition.
-		 * \param add_vec is the vector to be added to the calling object.
+		 * \param lhs is the MyVector to be added to.
+		 * \param rhs is the MyVector to be added to the calling object.
 		 * \return Returns a newly created vector where each container now
 		 * holds the sum of the two vectors passed at that index.
 		 * \pre += operator needs to be defined for type T.
@@ -258,6 +269,7 @@ class MyVector
 		/*! \brief Scalar multiplication
 		 *
 		 * Description: Allows for scalar multiplication of a calling vector.
+		 * \param lhs is the MyVector that the scalar will be multiplied on.
 		 * \param rhs is a scalar of type T to be multiplied through the
 		 * vector.
 		 * \return Returns a newly created vector where the data in each 
@@ -271,8 +283,9 @@ class MyVector
 		/*! \brief Scalar multiplication
 		 *
 		 * Description: Allows for scalar multiplication of a calling vector.
-		 * \param rhs is a scalar of type T to be multiplied through the
+		 * \param lhs is a scalar of type T to be multiplied through the
 		 * vector.
+		 * \param rhs is the MyVector that the scalar will be multiplied on.
 		 * \return Returns a newly created vector where the data in each 
 		 * container has been multiplied by the scalar.
 		 * \pre *= operator needs to be defined for type T.
@@ -480,7 +493,8 @@ class MyVector
  *
  * Description: Used to add two vectors together. Allows for vectors
  * of different (or similar) sizes to be added through vector addition.
- * \param add_vec is the vector to be added to the calling object.
+ * \param lhs is the MyVector to be added to.
+ * \param rhs is the MyVector to be added to the calling object.
  * \return Returns a newly created vector where each container now
  * holds the sum of the two vectors passed at that index.
  * \pre += operator needs to be defined for type T.
@@ -492,6 +506,7 @@ MyVector<T> operator+(const MyVector<T> & lhs, const MyVector<T> & rhs);
 /*! \brief Scalar multiplication
  *
  * Description: Allows for scalar multiplication of a calling vector.
+ * \param lhs is the MyVector that the scalar will be multiplied through.
  * \param rhs is a scalar of type T to be multiplied through the
  * vector.
  * \return Returns a newly created vector where the data in each 
@@ -505,6 +520,7 @@ MyVector<T> operator*(const MyVector<T> & lhs, const T & rhs);
 /*! \brief Scalar multiplication
  *
  * Description: Allows for scalar multiplication of a calling vector.
+ * \param lhs is a MyVector that the scalar will be muliplied through.
  * \param rhs is a scalar of type T to be multiplied through the
  * vector.
  * \return Returns a newly created vector where the data in each 
